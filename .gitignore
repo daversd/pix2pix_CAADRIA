@@ -123,3 +123,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+generate/
+informed_plans/
+checkpoints/
+exported/
+runs/
+test/
