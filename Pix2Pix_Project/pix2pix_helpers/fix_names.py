@@ -6,7 +6,7 @@ Note: Backup your files before proceeding.
 
 FOLDER = os.path.realpath("informed_plans")
 TARGET = "level "
-#REPLACE = "TEST"
+
 
 for (dirpath, dirnames, filenames) in os.walk(FOLDER):
     for filename in filenames:

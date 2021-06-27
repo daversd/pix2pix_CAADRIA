@@ -1,7 +1,7 @@
 """Pix2Pix implementation based on 
 https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
 Developed by David Dória https://github.com/daversd for
-2021 CAADRIA Workshop 1
+2021 InclusiveFutures Workshop 1
 
 """
 
@@ -23,10 +23,13 @@ from PIL import ImageOps
 # High level setup
 ##
 
-#FOLDER_NAME = 'informed_plans'                                   # The name of the data folder
-MODEL_NAME = 'informed_run_2'                              # The name of the model for this run
-LOAD_NUMBER = -1                                        # Number of the model to be loaded (-1 loads the latest)
-CKPT_DIR = os.path.join('checkpoints', MODEL_NAME)      # The folder to save checkpoints to
+# FOLDER_NAME = 'informed_plans'                                   # The name of the data folder
+# The name of the model for this run
+MODEL_NAME = 'informed_run_2'
+# Number of the model to be loaded (-1 loads the latest)
+LOAD_NUMBER = -1
+# The folder to save checkpoints to
+CKPT_DIR = os.path.join('checkpoints', MODEL_NAME)
 SAVE_DIR = 'generate'
 
 EPOCHS = 200
@@ -38,12 +41,13 @@ DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # Main program
 ##
 
+
 def load_model(model):
     """
     Loads the networks from the checkpoint specified in LOAD_NUMBER
     Use -1 to load the latest model.
     """
-    
+
     list_of_files = glob.glob(CKPT_DIR + '/*.pth')
 
     if LOAD_NUMBER == -1:
@@ -53,16 +57,18 @@ def load_model(model):
         print(file_number)
     else:
         file_number = LOAD_NUMBER
-    
+
     file_prefix = os.path.join(CKPT_DIR, str(file_number) + '_')
     netG_File = file_prefix + 'net_G.pth'
     netD_File = file_prefix + 'net_D.pth'
-    
+
     files_exist = os.path.exists(netG_File) and os.path.exists(netD_File)
     assert files_exist, f"Checkpoint {LOAD_NUMBER} does not exist. Check '{CKPT_DIR}' to see available checkpoints"
-    print(f"Loading model from checkpoint {file_number} \n"+ f"Generator is {netG_File} \n" + f"Discriminator is {netD_File}")
+    print(f"Loading model from checkpoint {file_number} \n" +
+          f"Generator is {netG_File} \n" + f"Discriminator is {netD_File}")
 
     model.load_networks(file_number)
+
 
 def scale_up(folder):
     """This method scales up the images in the folder by 4
@@ -88,6 +94,7 @@ def scale_up(folder):
 
                 im.save(filepath)
 
+
 def scale_down(folder):
     """This method scales up the images in the folder by 4
     (2,2) and then crops to the original size, expected to be 256x256
@@ -102,11 +109,11 @@ def scale_down(folder):
                 width = int(width / 2)
                 height = int(height / 2)
 
-
                 im = im.resize((width, height), resample=Image.NEAREST)
-                im = ImageOps.expand(im, 64, fill=(255, 255,255))
+                im = ImageOps.expand(im, 64, fill=(255, 255, 255))
 
                 im.save(filepath)
+
 
 if __name__ == '__main__':
 
@@ -115,14 +122,15 @@ if __name__ == '__main__':
     #testSet = torch.utils.data.DataLoader(testData, batch_size=BATCH_SIZE, shuffle= False, num_workers=0)
 
     # Create the pix2pix model in testing mode
-    model = Pix2PixModel(CKPT_DIR, MODEL_NAME, is_train=False, n_epochs=EPOCHS/2, n_epochs_decay=EPOCHS/2)
+    model = Pix2PixModel(CKPT_DIR, MODEL_NAME, is_train=False,
+                         n_epochs=EPOCHS/2, n_epochs_decay=EPOCHS/2)
     model.setup()
     model.eval()
     load_model(model)
 
-    
-    data_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    i=0
+    data_transforms = transforms.Compose(
+        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    i = 0
     # Iterate through test data set, for the lenght of the test sample
     scale_up(f"{SAVE_DIR}/source")
     for (dirpath, dirnames, filenames) in os.walk(f"{SAVE_DIR}/source"):
@@ -133,7 +141,7 @@ if __name__ == '__main__':
             im = im.view(1, 3, 256, 256)
             model.set_input(im, single=True)
             model.test()
-            
+
             visuals = model.get_current_visuals()
             save_path = os.path.join(f'{SAVE_DIR}/result', filename)
             util.save_generated(visuals, save_path)
